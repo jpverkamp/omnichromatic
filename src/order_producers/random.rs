@@ -1,7 +1,7 @@
+use crate::producers::{OrderProducer, RGB, XY};
+use image::RgbImage;
 use rand::Rng;
 use std::collections::HashSet;
-use image::RgbImage;
-use crate::producers::{OrderProducer, RGB, XY};
 
 #[derive(Clone, Debug)]
 pub struct RandomOrderProducer {
@@ -12,7 +12,7 @@ pub struct RandomOrderProducer {
 
 impl RandomOrderProducer {
     pub fn new(width: u32, height: u32) -> Self {
-        RandomOrderProducer { 
+        RandomOrderProducer {
             width,
             height,
             returned: HashSet::new(),

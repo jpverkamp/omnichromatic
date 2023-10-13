@@ -30,17 +30,23 @@ fn main() {
         let order_producers: Vec<Box<dyn OrderProducer>> = vec![
             Box::new(WritingOrderProducer::new(width)),
             Box::new(RandomOrderProducer::new(width, height)),
+            Box::new(DFSOrderProducer::new(width, height)),
+            Box::new(BFSOrderProducer::new(width, height)),
         ];
 
         for mut order_producer in order_producers {
-            println!("{} + {}", color_producer.to_string(), order_producer.to_string());
+            println!(
+                "{} + {}",
+                color_producer.to_string(),
+                order_producer.to_string()
+            );
 
             let mut colors_used = HashSet::new();
             let mut points_used = HashSet::new();
 
             for _i in 0..(width * height) {
                 // Try to generate the color first
-                let mut rgb  = color_producer.next(&image, None);
+                let mut rgb = color_producer.next(&image, None);
 
                 // Then the point/order
                 let xy = order_producer.next(&image, rgb);
@@ -52,7 +58,10 @@ fn main() {
 
                 // Verify we actually got a color this time and unpack it
                 if rgb.is_none() {
-                    panic!("{} did not produce a color after either call", color_producer.to_string());
+                    panic!(
+                        "{} did not produce a color after either call",
+                        color_producer.to_string()
+                    );
                 }
                 let rgb = rgb.unwrap();
 
@@ -74,7 +83,13 @@ fn main() {
                 *pixel = image::Rgb(rgb);
             }
 
-            let filename = format!("output/{}x{} - {} - {}.png", width, height, color_producer.to_string(), order_producer.to_string());
+            let filename = format!(
+                "output/{}x{} - {} - {}.png",
+                width,
+                height,
+                color_producer.to_string(),
+                order_producer.to_string()
+            );
             image.save(filename).unwrap();
         }
     }

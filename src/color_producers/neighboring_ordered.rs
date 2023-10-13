@@ -1,7 +1,7 @@
+use crate::producers::{ColorProducer, RGB, XY};
+use image::RgbImage;
 use rand::Rng;
 use std::collections::HashSet;
-use image::RgbImage;
-use crate::producers::{ColorProducer, RGB, XY};
 
 #[derive(Debug)]
 pub struct NeighboringOrderedColorProducer {
@@ -11,7 +11,7 @@ pub struct NeighboringOrderedColorProducer {
 
 impl NeighboringOrderedColorProducer {
     pub fn new() -> Self {
-        NeighboringOrderedColorProducer { 
+        NeighboringOrderedColorProducer {
             stack: Vec::new(),
             returned: HashSet::new(),
         }
@@ -29,7 +29,7 @@ impl ColorProducer for NeighboringOrderedColorProducer {
             let mut rgb = [
                 rand::thread_rng().gen(),
                 rand::thread_rng().gen(),
-                rand::thread_rng().gen()
+                rand::thread_rng().gen(),
             ];
 
             // If we have a color on the stack, pop and try neighbors

@@ -1,20 +1,16 @@
-use image::RgbImage;
 use crate::producers::{OrderProducer, RGB, XY};
+use image::RgbImage;
 
 #[derive(Clone, Debug)]
 pub struct WritingOrderProducer {
     width: u32,
-    x: u32, 
-    y: u32
+    x: u32,
+    y: u32,
 }
 
 impl WritingOrderProducer {
     pub fn new(width: u32) -> Self {
-        WritingOrderProducer { 
-            width,
-            x: 0,
-            y: 0,
-        }
+        WritingOrderProducer { width, x: 0, y: 0 }
     }
 }
 

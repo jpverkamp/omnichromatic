@@ -1,7 +1,7 @@
+use crate::producers::{ColorProducer, RGB, XY};
+use image::RgbImage;
 use rand::Rng;
 use std::collections::HashSet;
-use image::RgbImage;
-use crate::producers::{ColorProducer, RGB, XY};
 
 #[derive(Debug)]
 pub struct RandomColorProducer {
@@ -10,7 +10,9 @@ pub struct RandomColorProducer {
 
 impl RandomColorProducer {
     pub fn new() -> Self {
-        RandomColorProducer { returned: HashSet::new() }
+        RandomColorProducer {
+            returned: HashSet::new(),
+        }
     }
 }
 
@@ -24,7 +26,7 @@ impl ColorProducer for RandomColorProducer {
             let rgb = [
                 rand::thread_rng().gen(),
                 rand::thread_rng().gen(),
-                rand::thread_rng().gen()
+                rand::thread_rng().gen(),
             ];
             if !self.returned.contains(&rgb) {
                 self.returned.insert(rgb);
