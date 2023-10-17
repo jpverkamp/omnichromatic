@@ -80,7 +80,7 @@ fn main() {
 
                 let [x, y] = xy;
                 let pixel = image.get_pixel_mut(x as u32, y as u32);
-                *pixel = image::Rgb(rgb);
+                *pixel = image::Rgb::from(rgb);
             }
 
             let filename = format!(

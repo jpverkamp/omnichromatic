@@ -22,9 +22,9 @@ impl ColorProducer for GrayCodeColorProducer {
     }
 
     fn next(&mut self, _img: &RgbImage, _pt: Option<XY>) -> Option<RGB> {
-        let g = self.index ^ (self.index << 1);
+        let gray = self.index ^ (self.index << 1);
         self.index += self.skip;
 
-        Some([(g >> 16) as u8, (g >> 8) as u8, (g >> 0) as u8])
+        Some([(gray >> 16) as u8, (gray >> 8) as u8, (gray >> 0) as u8])
     }
 }
