@@ -533,6 +533,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "point_dfs"
+version = "0.1.0"
+dependencies = [
+ "lazy_static",
+ "rand",
+ "types",
+]
+
+[[package]]
 name = "point_writing"
 version = "0.1.0"
 dependencies = [
