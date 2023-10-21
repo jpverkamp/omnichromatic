@@ -1,5 +1,5 @@
-use std::collections::HashSet;
 use lazy_static::lazy_static;
+use std::collections::HashSet;
 use std::sync::Mutex;
 use types::XY;
 

@@ -1,12 +1,11 @@
-use std::collections::HashSet;
 use lazy_static::lazy_static;
+use std::collections::HashSet;
 use std::sync::Mutex;
-use types::{XY, RGB};
+use types::{RGB, XY};
 
 lazy_static! {
     static ref USED: Mutex<HashSet<RGB>> = Mutex::new(HashSet::new());
 }
-
 
 #[no_mangle]
 pub extern "C" fn get_color(_pt: XY) -> RGB {

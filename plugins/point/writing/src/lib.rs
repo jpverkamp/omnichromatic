@@ -19,7 +19,10 @@ pub extern "C" fn get_point() -> XY {
     let bounds = BOUNDS.lock().unwrap();
     let mut current = CURRENT.lock().unwrap();
 
-    let xy = XY { x: current.x, y: current.y };
+    let xy = XY {
+        x: current.x,
+        y: current.y,
+    };
 
     current.x += 1;
     if current.x >= bounds.x {
