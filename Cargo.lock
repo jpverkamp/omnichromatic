@@ -157,6 +157,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "color_dfs"
+version = "0.1.0"
+dependencies = [
+ "lazy_static",
+ "rand",
+ "types",
+]
+
+[[package]]
 name = "color_ordered"
 version = "0.1.0"
 dependencies = [
