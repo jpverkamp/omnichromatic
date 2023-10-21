@@ -1,8 +1,8 @@
-[package]
-name = "omnichromatic"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-image = { version = "0.24.5", default-features = false, features = ["png"] }
-rand = "0.8.5"
+[workspace]
+resolver = "2"
+members = [
+    "omnichromatic",
+    "types",
+    "plugins/color/*",
+    "plugins/point/*",
+]
