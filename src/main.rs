@@ -28,10 +28,12 @@ fn main() {
 
     for mut color_producer in color_producers {
         let order_producers: Vec<Box<dyn OrderProducer>> = vec![
-            Box::new(WritingOrderProducer::new(width)),
-            Box::new(RandomOrderProducer::new(width, height)),
-            Box::new(DFSOrderProducer::new(width, height)),
-            Box::new(BFSOrderProducer::new(width, height)),
+            // Box::new(WritingOrderProducer::new(width)),
+            // Box::new(RandomOrderProducer::new(width, height)),
+            // Box::new(DFSOrderProducer::new(width, height)),
+            // Box::new(BFSOrderProducer::new(width, height)),
+            // Box::new(SquareProducer::new(width, height)),
+            Box::new(SquareFillProducer::new(width, height)),
         ];
 
         for mut order_producer in order_producers {
