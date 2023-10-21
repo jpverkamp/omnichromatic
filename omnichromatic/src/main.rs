@@ -1,11 +1,11 @@
 use clap::Parser;
+use cliargs::*;
 use libloading::Library;
 use providers::*;
 use std::{collections::HashSet, env};
-use cliargs::*;
 
-mod providers;
 mod cliargs;
+mod providers;
 
 fn main() {
     let args = App::parse();
@@ -26,12 +26,10 @@ fn main() {
     env_logger::init();
 
     // Load the providers
-    let point_provider_lib =
-        unsafe { Library::new(args.globals.point_provider).unwrap() };
+    let point_provider_lib = unsafe { Library::new(args.globals.point_provider).unwrap() };
     let point_provider = PointProvider::new(&point_provider_lib);
 
-    let color_provider_lib =
-        unsafe { Library::new(args.globals.color_provider).unwrap() };
+    let color_provider_lib = unsafe { Library::new(args.globals.color_provider).unwrap() };
     let color_provider = ColorProvider::new(&color_provider_lib);
 
     // Fire off initialization methods

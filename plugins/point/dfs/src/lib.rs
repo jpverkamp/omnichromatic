@@ -1,7 +1,10 @@
 use lazy_static::lazy_static;
-use std::{sync::Mutex, collections::{VecDeque, HashSet}};
-use types::XY;
 use rand::seq::SliceRandom;
+use std::{
+    collections::{HashSet, VecDeque},
+    sync::Mutex,
+};
+use types::XY;
 
 lazy_static! {
     static ref BOUNDS: Mutex<XY> = Mutex::new(XY { x: 1920, y: 1080 });
@@ -16,7 +19,10 @@ pub extern "C" fn set_size(width: usize, height: usize) {
     bounds.x = width;
     bounds.y = height;
 
-    let origin = XY { x: width / 2, y: height / 2 };
+    let origin = XY {
+        x: width / 2,
+        y: height / 2,
+    };
 
     let mut queue = QUEUE.lock().unwrap();
     let mut queued = QUEUED.lock().unwrap();
@@ -32,7 +38,7 @@ pub extern "C" fn get_point() -> XY {
     let mut queued = QUEUED.lock().unwrap();
     let mut used = USED.lock().unwrap();
 
-    loop { 
+    loop {
         // Next color to return
         let xy = queue.pop_front().unwrap();
 

@@ -1,7 +1,10 @@
 use lazy_static::lazy_static;
-use std::{sync::Mutex, collections::{VecDeque, HashSet}};
-use types::{RGB, XY};
 use rand::seq::SliceRandom;
+use std::{
+    collections::{HashSet, VecDeque},
+    sync::Mutex,
+};
+use types::{RGB, XY};
 
 lazy_static! {
     // The order to check colors
@@ -28,7 +31,7 @@ pub extern "C" fn get_color(_pt: XY) -> RGB {
     let mut queued = QUEUED.lock().unwrap();
     let mut used = USED.lock().unwrap();
 
-    loop { 
+    loop {
         // Next color to return
         let rgb = queue.pop_front().unwrap();
 
