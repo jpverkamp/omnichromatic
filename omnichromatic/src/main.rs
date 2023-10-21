@@ -9,17 +9,23 @@ mod cliargs;
 
 fn main() {
     let args = App::parse();
-
-    if args.globals.debug && env::var("RUST_LOG").is_err() {
-        env::set_var("RUST_LOG", "debug")
-    }
-
-    env_logger::init();
-
     let width = args.globals.width;
     let height = args.globals.height;
     let size = width * height;
 
+    // Warn that animation is not implemented yet
+    match args.mode {
+        Mode::Render => (),
+        Mode::Animate { .. } => unimplemented!(),
+    }
+
+    // Override RUST_LOG if debug is enabled
+    if args.globals.debug {
+        env::set_var("RUST_LOG", "debug")
+    }
+    env_logger::init();
+
+    // Load the providers
     let point_provider_lib =
         unsafe { Library::new(args.globals.point_provider).unwrap() };
     let point_provider = PointProvider::new(&point_provider_lib);
@@ -28,8 +34,11 @@ fn main() {
         unsafe { Library::new(args.globals.color_provider).unwrap() };
     let color_provider = ColorProvider::new(&color_provider_lib);
 
+    // Fire off initialization methods
+    // If the libraries don't define these, that's fine, they just won't be called
     point_provider.set_size(width, height);
 
+    // Generate the actual image; assert that the providers are behaving
     let mut image = image::RgbImage::new(width as u32, height as u32);
 
     let mut points_used = HashSet::new();
