@@ -1,98 +1,103 @@
 use std::collections::HashSet;
+use clap::{Parser, Args, Subcommand};
+use anyhow::Result;
 
-mod producers;
-use producers::{ColorProducer, OrderProducer};
+mod provider;
+use provider::Provider;
 
-mod color_producers;
-use color_producers::*;
+// The top-level application
+#[derive(Parser, Debug)]
+#[clap(name = "omnichromatic", version = "0.1.0", author = "JP Verkamp")]
+struct App {
+    #[clap(flatten)]
+    globals: GlobalArgs,
 
-mod order_producers;
-use order_producers::*;
+    #[clap(subcommand)]
+    mode: Mode,
+}
 
-fn main() {
-    let width = 1024;
-    let height = 1024;
+// Global arguments that apply to all subcommands
+#[derive(Args, Debug)]
+struct GlobalArgs {
+    #[clap(long, short = 'd', name = "debug")]
+    debug: bool,
 
-    // let width = 4096;
-    // let height = 4096;
+    #[clap(long, short = 'x', name = "width", help = "Width of the generated image")]
+    width: u32,
+
+    #[clap(long, short = 'y', name = "height", help = "Height of the generated image")]
+    height: u32,
+
+    #[clap(long, short = 'c', name = "color-provider", help = "Provide the order of RGB colors")]
+    color_provider: String,
+
+    #[clap(long, short = 'p', name = "point-provider", help = "Provide the order of XY points")]
+    point_provider: String,    
+}
+
+/// The specific subcommands that can be run
+#[derive(Subcommand, Debug)]
+enum Mode {
+    #[clap(name = "render", about = "Render a single image")]
+    Render,
+
+    #[clap(name = "animate", about = "Render an animation of the image being built")]
+    Animate,
+}
+
+
+fn main() -> Result<()> {
+    env_logger::init();
+
+    let args = App::parse();
+    let width = args.globals.width;
+    let height = args.globals.height;
+    let size = width * height;
 
     let mut image = image::RgbImage::new(width, height);
 
-    let color_producers: Vec<Box<dyn ColorProducer>> = vec![
-        Box::new(RandomColorProducer::new()),
-        Box::new(OrderedColorProducer::new()),
-        Box::new(GrayCodeColorProducer::new(width as usize, height as usize)),
-        Box::new(NeighboringOrderedColorProducer::new()),
-        Box::new(NeighboringRandomColorProducer::new()),
-    ];
+    let mut color_provider = Provider::new(args.globals.color_provider)?;
+    let mut point_provider = Provider::new(args.globals.point_provider)?;
+    
+    // Send initialization to providers, don't expect a response
+    color_provider.send(format!("set-size {width} {height}"))?;
+    point_provider.send(format!("set-size {width} {height}"))?;
 
-    for mut color_producer in color_producers {
-        let order_producers: Vec<Box<dyn OrderProducer>> = vec![
-            // Box::new(WritingOrderProducer::new(width)),
-            // Box::new(RandomOrderProducer::new(width, height)),
-            // Box::new(DFSOrderProducer::new(width, height)),
-            // Box::new(BFSOrderProducer::new(width, height)),
-            // Box::new(SquareProducer::new(width, height)),
-            Box::new(SquareFillProducer::new(width, height)),
-        ];
+    // Track points and colors used in case the providers mess up
+    let mut colors_used = HashSet::new();
+    let mut points_used = HashSet::new();
 
-        for mut order_producer in order_producers {
-            println!(
-                "{} + {}",
-                color_producer.to_string(),
-                order_producer.to_string()
-            );
+    // Generate enough points, this will assume that the providers behave
+    for i in 0..size {
+        let point = point_provider.ask(format!("get-point"), "point")?;
+        assert!(point.len() == 2);
+        let x = point[0].parse::<u32>()?;
+        let y = point[1].parse::<u32>()?;
+        assert!(points_used.contains(&(x, y)) == false);
+        
+        let color = color_provider.ask(format!("get-color"), "color")?;
+        assert!(color.len() == 3);
+        let r = color[0].parse::<u8>()?;
+        let g = color[1].parse::<u8>()?;
+        let b = color[2].parse::<u8>()?;
+        assert!(colors_used.contains(&(r, g, b)) == false);
 
-            let mut colors_used = HashSet::new();
-            let mut points_used = HashSet::new();
-
-            for _i in 0..(width * height) {
-                // Try to generate the color first
-                let mut rgb = color_producer.next(&image, None);
-
-                // Then the point/order
-                let xy = order_producer.next(&image, rgb);
-
-                // If we didn't produce a color already, do so now
-                if rgb.is_none() {
-                    rgb = color_producer.next(&image, Some(xy));
-                }
-
-                // Verify we actually got a color this time and unpack it
-                if rgb.is_none() {
-                    panic!(
-                        "{} did not produce a color after either call",
-                        color_producer.to_string()
-                    );
-                }
-                let rgb = rgb.unwrap();
-
-                // Verify no duplicates
-                if colors_used.contains(&rgb) {
-                    panic!("color {rgb:?} used twice");
-                } else {
-                    colors_used.insert(rgb);
-                }
-
-                if points_used.contains(&xy) {
-                    panic!("point {xy:?} used twice");
-                } else {
-                    points_used.insert(xy);
-                }
-
-                let [x, y] = xy;
-                let pixel = image.get_pixel_mut(x as u32, y as u32);
-                *pixel = image::Rgb::from(rgb);
-            }
-
-            let filename = format!(
-                "output/{}x{} - {} - {}.png",
-                width,
-                height,
-                color_producer.to_string(),
-                order_producer.to_string()
-            );
-            image.save(filename).unwrap();
+        if i % 1000 == 0 {
+            log::info!("[{i} of {size}] {r},{g},{b} @ {x},{y}");
+        } else {
+            log::debug!("[{i} of {size}] {r},{g},{b} @ {x},{y}");
         }
+
+        let pixel = image.get_pixel_mut(x as u32, y as u32);
+        *pixel = image::Rgb::from([r, g, b]);
+        
+        points_used.insert((x, y));
+        colors_used.insert((r, g, b));
     }
+
+    // TODO: arg this
+    let filename = "output.png";
+    image.save(filename)?;
+
+    Ok(())
 }
