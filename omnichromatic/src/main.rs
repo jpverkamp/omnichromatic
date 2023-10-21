@@ -1,23 +1,32 @@
+use clap::Parser;
 use libloading::Library;
 use providers::*;
-use std::collections::HashSet;
+use std::{collections::HashSet, env};
+use cliargs::*;
 
 mod providers;
+mod cliargs;
 
 fn main() {
+    let args = App::parse();
+
+    if args.globals.debug && env::var("RUST_LOG").is_err() {
+        env::set_var("RUST_LOG", "debug")
+    }
+
     env_logger::init();
 
+    let width = args.globals.width;
+    let height = args.globals.height;
+    let size = width * height;
+
     let point_provider_lib =
-        unsafe { Library::new("target/release/libpoint_writing.dylib").unwrap() };
+        unsafe { Library::new(args.globals.point_provider).unwrap() };
     let point_provider = PointProvider::new(&point_provider_lib);
 
     let color_provider_lib =
-        unsafe { Library::new("target/release/libcolor_ordered.dylib").unwrap() };
+        unsafe { Library::new(args.globals.color_provider).unwrap() };
     let color_provider = ColorProvider::new(&color_provider_lib);
-
-    let width = 640;
-    let height = 480;
-    let size = width * height;
 
     point_provider.set_size(width, height);
 
@@ -47,5 +56,5 @@ fn main() {
         colors_used.insert(rgb);
     }
 
-    image.save("random.png").unwrap();
+    image.save(args.globals.output).unwrap();
 }
