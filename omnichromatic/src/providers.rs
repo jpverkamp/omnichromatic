@@ -1,18 +1,19 @@
 use libloading::{Library, Symbol};
 use types::{RGB, XY};
 
+type SetSizeFn = fn(usize, usize);
 type PointProviderFn = fn() -> XY;
 type ColorProviderFn = fn(XY) -> RGB;
 
 pub struct PointProvider<'lib> {
-    set_size: Option<Symbol<'lib, fn(usize, usize)>>,
+    set_size: Option<Symbol<'lib, SetSizeFn>>,
     get_point: Symbol<'lib, PointProviderFn>,
 }
 
 impl<'lib> PointProvider<'lib> {
     pub fn new(library: &'lib Library) -> Self {
         unsafe {
-            let set_size: Option<Symbol<'lib, fn(usize, usize)>> = library.get(b"set_size").ok();
+            let set_size: Option<Symbol<'lib, SetSizeFn>> = library.get(b"set_size").ok();
             let get_point: Symbol<'lib, PointProviderFn> = library.get(b"get_point").unwrap();
             PointProvider {
                 set_size,

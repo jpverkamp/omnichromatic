@@ -31,30 +31,28 @@ pub extern "C" fn get_color(_pt: XY) -> RGB {
     let mut queued = QUEUED.lock().unwrap();
     let mut used = USED.lock().unwrap();
 
-    loop {
-        // Next color to return
-        let rgb = queue.pop_front().unwrap();
+    // Next color to return
+    let rgb = queue.pop_front().unwrap();
 
-        // Add neighbors that aren't already queued or used to queue
-        let mut neighbors = Vec::new();
-        for r in (1.max(rgb.r) - 1)..=255.min(rgb.r + 1) {
-            for g in (1.max(rgb.g) - 1)..=255.min(rgb.g + 1) {
-                for b in (1.max(rgb.b) - 1)..=255.min(rgb.b + 1) {
-                    let neighbor = RGB { r, g, b };
-                    if !queued.contains(&neighbor) && !used.contains(&neighbor) {
-                        neighbors.push(neighbor);
-                    }
+    // Add neighbors that aren't already queued or used to queue
+    let mut neighbors = Vec::new();
+    for r in (1.max(rgb.r) - 1)..=255.min(rgb.r + 1) {
+        for g in (1.max(rgb.g) - 1)..=255.min(rgb.g + 1) {
+            for b in (1.max(rgb.b) - 1)..=255.min(rgb.b + 1) {
+                let neighbor = RGB { r, g, b };
+                if !queued.contains(&neighbor) && !used.contains(&neighbor) {
+                    neighbors.push(neighbor);
                 }
             }
         }
-        neighbors.shuffle(&mut rand::thread_rng());
-
-        for neighbor in neighbors {
-            queue.push_back(neighbor);
-            queued.insert(neighbor);
-        }
-
-        used.insert(rgb);
-        return rgb;
     }
+    neighbors.shuffle(&mut rand::thread_rng());
+
+    for neighbor in neighbors {
+        queue.push_back(neighbor);
+        queued.insert(neighbor);
+    }
+
+    used.insert(rgb);
+    rgb
 }

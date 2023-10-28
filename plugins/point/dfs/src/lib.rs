@@ -38,28 +38,26 @@ pub extern "C" fn get_point() -> XY {
     let mut queued = QUEUED.lock().unwrap();
     let mut used = USED.lock().unwrap();
 
-    loop {
-        // Next color to return
-        let xy = queue.pop_front().unwrap();
+    // Next color to return
+    let xy = queue.pop_front().unwrap();
 
-        // Add neighbors that aren't already queued or used to queue
-        let mut neighbors = Vec::new();
-        for x in (1.max(xy.x) - 1)..=(bounds.x - 1).min(xy.x + 1) {
-            for y in (1.max(xy.y) - 1)..=(bounds.y - 1).min(xy.y + 1) {
-                let neighbor = XY { x, y };
-                if !queued.contains(&neighbor) && !used.contains(&neighbor) {
-                    neighbors.push(neighbor);
-                }
+    // Add neighbors that aren't already queued or used to queue
+    let mut neighbors = Vec::new();
+    for x in (1.max(xy.x) - 1)..=(bounds.x - 1).min(xy.x + 1) {
+        for y in (1.max(xy.y) - 1)..=(bounds.y - 1).min(xy.y + 1) {
+            let neighbor = XY { x, y };
+            if !queued.contains(&neighbor) && !used.contains(&neighbor) {
+                neighbors.push(neighbor);
             }
         }
-        neighbors.shuffle(&mut rand::thread_rng());
-
-        for neighbor in neighbors {
-            queue.push_back(neighbor);
-            queued.insert(neighbor);
-        }
-
-        used.insert(xy);
-        return xy;
     }
+    neighbors.shuffle(&mut rand::thread_rng());
+
+    for neighbor in neighbors {
+        queue.push_back(neighbor);
+        queued.insert(neighbor);
+    }
+
+    used.insert(xy);
+    xy
 }
