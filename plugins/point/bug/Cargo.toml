@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 types = { path = "../../../types" }
 lazy_static = "1.4.0"
-rand = "0.8.5"
+rand = "0.9.3"
 
 [lib]
 name = "point_bug"
